@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 8000;
+const cors = require('cors'); 
 const authRoutes = require('./routes/authRoutes');
 const departmentRoutes = require('./routes/departmentRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -11,6 +12,13 @@ const logger = require('./utils/logger');
 
 // Middleware for parsing JSON bodies
 app.use(express.json());
+
+// Enable CORS
+app.use(cors({
+  origin: 'http://localhost:5173', // Your Vite app URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+}));
 
 // Routes
 app.use('/api/auth', authRoutes);

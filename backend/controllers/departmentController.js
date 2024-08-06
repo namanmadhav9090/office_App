@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const { Department, DepartmentEmployee } = require("../models");
+const { Department, DepartmentEmployee, User } = require("../models");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const logger = require("../utils/logger");
@@ -47,8 +47,10 @@ module.exports = {
     try {
       const { departmentId } = req.query;
       const page = parseInt(req.query.page, 10) || 1; // Default to page 1 if not provided
-      const limit = parseInt(req.query.limit, 10) || 10; // Default to limit 10 if not provided
+      const limit = parseInt(req.query.limit, 10) || 5; // Default to limit 10 if not provided
       const offset = (page - 1) * limit; // Calculate the offset
+
+      
 
       if (departmentId) {
         const data = await Department.findOne({
@@ -69,25 +71,38 @@ module.exports = {
       const { count, rows } = await Department.findAndCountAll({
         limit, // Number of items per page
         offset, // Number of items to skip
+        include: [{ model: User, through: { attributes: [] } }]
       });
+
+      const totalCount = await Department.count();
 
       if (rows.length === 0) {
         return sendResponse(res, 404, rows, "No data found");
       }
 
+      console.log('count',totalCount);
+
+
+
       // Calculate total pages
-      const totalPages = Math.ceil(count / limit);
+      // const totalPages = Math.ceil(totalCount / limit);
+
+      console.log('czczcc',{ totalItems: count,
+        // totalPages,
+        currentPage: page,
+        pageSize: limit,})
       return sendResponse(
         res,
         200,
         {
           data: rows,
-          pagination: {
-            totalItems: count,
-            totalPages,
-            currentPage: page,
-            pageSize: limit,
-          },
+          totalItems : totalCount
+          // pagination: {
+          //   totalItems: count,
+          //   totalPages,
+          //   currentPage: page,
+          //   pageSize: limit,
+          // },
         },
         "All Departments list"
       );

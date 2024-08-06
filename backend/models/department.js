@@ -29,6 +29,8 @@ module.exports = (sequelize, DataTypes) => {
       through: 'DepartmentEmployee',
       foreignKey: 'departmentId'
     });
+
+    
   };
 
   return Department;

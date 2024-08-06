@@ -1,0 +1,41 @@
+src/
+├── assets/
+│   └── images/
+├── components/
+│   ├── common/
+│   │   ├── Button.js
+│   │   ├── InputField.js
+│   │   └── Spinner.js
+│   ├── auth/
+│   │   ├── Login.js
+│   │   └── Signup.js
+│   ├── department/
+│   │   ├── DepartmentDashboard.js
+│   │   ├── DepartmentDetails.js
+│   │   └── DepartmentForm.js
+│   └── employee/
+│       └── AssignEmployees.js
+├── pages/
+│   ├── LoginPage.js
+│   ├── SignupPage.js
+│   ├── DepartmentPage.js
+│   └── AssignEmployeesPage.js
+├── App.js
+├── index.css
+└── index.js
+
+
+
+UI Flow Overview
+Authentication Screens
+
+Login Screen: Allows users to log in.
+Signup Screen: Allows users to register.
+Dashboard Screens (For Managers)
+
+Department Dashboard: Displays departments with pagination.
+Department Details: Shows detailed info of a selected department.
+Create/Update Department: Form to create or update a department.
+Employee Management Screens
+
+Assign Employees: Assigns employees to a department.

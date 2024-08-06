@@ -79,7 +79,7 @@ module.exports = {
     const { email, password, role } = req.body;
 
     try {
-      const user = await User.findOne({ where: { email } });
+      const user = await User.findOne({ where: { email, role } });
       if (!user || !(await bcrypt.compare(password, user.password))) {
         return sendError(res, 400, "Invalid email or password");
       }
