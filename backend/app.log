@@ -14,3 +14,17 @@
 2024-08-06T13:25:40.695Z [[31merror[39m]: Error during assigning employees: 
 2024-08-06T20:34:17.994Z [[31merror[39m]: Error during signup: 
 2024-08-06T20:56:11.702Z [[31merror[39m]: Error during signup: 
+2024-08-07T10:46:42.510Z [[31merror[39m]: Error: Expected double-quoted property name in JSON at position 141
+Stack: SyntaxError: Expected double-quoted property name in JSON at position 141
+    at JSON.parse (<anonymous>)
+    at parse (D:\T1\backend\node_modules\body-parser\lib\types\json.js:92:19)
+    at D:\T1\backend\node_modules\body-parser\lib\read.js:128:18
+    at AsyncResource.runInAsyncScope (node:async_hooks:206:9)
+    at invokeCallback (D:\T1\backend\node_modules\raw-body\index.js:238:16)
+    at done (D:\T1\backend\node_modules\raw-body\index.js:227:7)
+    at IncomingMessage.onEnd (D:\T1\backend\node_modules\raw-body\index.js:287:7)
+    at IncomingMessage.emit (node:events:519:28)
+    at endReadableNT (node:internal/streams/readable:1696:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+2024-08-07T11:23:19.495Z [[31merror[39m]: Error during department update: 
+2024-08-07T11:23:48.812Z [[31merror[39m]: Error during department update: 

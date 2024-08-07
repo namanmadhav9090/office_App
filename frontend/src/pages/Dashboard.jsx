@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+
 import { FiMenu } from "react-icons/fi";
+
+import Card from "@mui/material/Card";
+
+import CardContent from "@mui/material/CardContent";
+
 import {
   Table,
   TableBody,
@@ -25,6 +30,10 @@ import {
   TextField,
   Checkbox,
   FormControlLabel,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import Sidebar from "../components/Sidebar";
 import Cookies from "js-cookie";
@@ -32,109 +41,22 @@ import ButtonBox from "../components/Button";
 import api from "../utils/apiInterceptor";
 import { endPoints } from "../utils/endpoints";
 
-const dummyDepartments = [
-  {
-    id: 1,
-    departmentName: "HR",
-    categoryName: "Administration",
-    location: "New York",
-    salary: 60000,
-    assignedEmployees: [1, 2],
-  },
-  {
-    id: 2,
-    departmentName: "Engineering",
-    categoryName: "Tech",
-    location: "San Francisco",
-    salary: 80000,
-    assignedEmployees: [2, 3],
-  },
-  {
-    id: 3,
-    departmentName: "Marketing",
-    categoryName: "Sales",
-    location: "Chicago",
-    salary: 55000,
-    assignedEmployees: [4],
-  },
-  {
-    id: 4,
-    departmentName: "Finance",
-    categoryName: "Finance",
-    location: "Austin",
-    salary: 75000,
-    assignedEmployees: [],
-  },
-  {
-    id: 5,
-    departmentName: "Legal",
-    categoryName: "Legal",
-    location: "Seattle",
-    salary: 70000,
-    assignedEmployees: [5],
-  },
-];
-
-// const dummyEmployees = [
-//   { id: 1, name: 'Alice Johnson' },
-//   { id: 2, name: 'Bob Smith' },
-//   { id: 3, name: 'Charlie Davis' },
-//   { id: 4, name: 'Diana Evans' },
-//   { id: 5, name: 'Edward Lee' }
-// ];
-
-const dummyEmployees = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "john.doe@example.com",
-    role: "Employee",
-    department: { name: "Engineering" },
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    email: "jane.smith@example.com",
-    role: "Manager",
-    department: { name: "Marketing" },
-  },
-  {
-    id: 3,
-    name: "Emily Johnson",
-    email: "emily.johnson@example.com",
-    role: "Employee",
-    department: { name: "HR" },
-  },
-  {
-    id: 4,
-    name: "Michael Brown",
-    email: "michael.brown@example.com",
-    role: "Employee",
-    department: null,
-  },
-  {
-    id: 5,
-    name: "Linda Davis",
-    email: "linda.davis@example.com",
-    role: "Manager",
-    department: { name: "Sales" },
-  },
-];
-
 const Dashboard = () => {
   const userRole = Cookies.get("role");
-  // console.log("userRole", userRole);
+  const id = Cookies.get("id");
   const [role, setRole] = useState(userRole);
+  const [userid, setUserId] = useState(id);
   const navigate = useNavigate();
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(2);
-  const [rowsPerPage, setRowsPerPage] = useState(1);
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalRows, setTotalRows] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [openAssignDialog, setOpenAssignDialog] = useState(false);
   const [dialogMode, setDialogMode] = useState("add"); // 'add' or 'edit'
+  const [empdetail, setEmpDetail] = useState();
   const [formData, setFormData] = useState({
     departmentName: "",
     categoryName: "",
@@ -142,36 +64,33 @@ const Dashboard = () => {
     salary: "",
   });
   const [selectedDepartmentId, setSelectedDepartmentId] = useState(null);
-  const [assignedEmployees, setAssignedEmployees] = useState([]);
+
   const [selectedEmployees, setSelectedEmployees] = useState([]);
 
   const [employees, setEmployees] = useState([]);
 
- 
+  const fetchEmployees = async () => {
+    try {
+      const response = await api.get(endPoints.allEmployees);
 
-  // useEffect(() => {
-  //   const fetchEmployees = async () => {
-  //     try {
-  //       const response = await axios.get('/api/employees'); // Adjust the endpoint as needed
-  //       setEmployees(response.data); // Adjust based on the actual data structure
-  //     } catch (error) {
-  //       console.error('Error fetching employees:', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+      setEmployees(response?.data?.data);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
 
-  //   fetchEmployees();
-  // }, []);
+  const fetchEmpDetail = async () => {
+    try {
+      const response = await api.get(`${endPoints.allEmployees}?id=${userid}`);
+
+      setEmpDetail(response?.data?.data);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
   useEffect(() => {
-    // Simulate data fetching
-    const fetchEmployees = () => {
-      setTimeout(() => {
-        setEmployees(dummyEmployees);
-        setLoading(false);
-      }, 1000); // Simulate a network delay
-    };
-
+    fetchEmpDetail();
     fetchEmployees();
   }, []);
 
@@ -181,6 +100,9 @@ const Dashboard = () => {
 
   const handleOpenDialog = (mode = "add", department = null) => {
     setDialogMode(mode);
+    let assignEmp = department?.Users?.map((e) => e.id);
+    setOpenDialog(true);
+
     if (department) {
       setSelectedDepartmentId(department.id);
       setFormData({
@@ -189,8 +111,8 @@ const Dashboard = () => {
         location: department.location,
         salary: department.salary,
       });
-      setAssignedEmployees(department.assignedEmployees); // Set preselected employees
-      setSelectedEmployees(department.assignedEmployees); // Initialize selected employees
+      setAssignedEmployees(assignEmp);
+      setSelectedEmployees(assignEmp);
     } else {
       setFormData({
         departmentName: "",
@@ -216,30 +138,47 @@ const Dashboard = () => {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (dialogMode === "add") {
-      // Add new department
-      setDepartments([
-        ...departments,
-        {
-          id: departments.length + 1, // Simulate an ID generation
-          ...formData,
-          assignedEmployees: selectedEmployees, // Assign employees when adding
-        },
-      ]);
+      try {
+        const crDepartment = await api.post(
+          `${endPoints.createDept}`,
+          {
+            departmentName: formData?.departmentName,
+            categoryName: formData?.categoryName,
+            location: formData?.location,
+            salary: formData?.salary,
+            managerId : userid
+          }
+        );
+
+        if (crDepartment?.data?.statusCode == 200 || 201) {
+          fetchDepartments();
+          alert("Department Created Successfully");
+        }
+      } catch (error) {
+        console.log("error::", error);
+      }
     } else if (dialogMode === "edit" && selectedDepartmentId) {
-      // Edit existing department
-      setDepartments(
-        departments.map((department) =>
-          department.id === selectedDepartmentId
-            ? {
-                ...department,
-                ...formData,
-                assignedEmployees: selectedEmployees,
-              }
-            : department
-        )
-      );
+      try {
+        const uptDepartment = await api.put(
+          `${endPoints.updateDept}?departmentId=${selectedDepartmentId}`,
+          {
+            departmentName: formData?.departmentName,
+            categoryName: formData?.categoryName,
+            location: formData?.location,
+            salary: formData?.salary,
+            employeeIds: selectedEmployees,
+          }
+        );
+
+        if (uptDepartment?.data?.statusCode == 200) {
+          fetchDepartments();
+          alert("Department Updated Successfully");
+        }
+      } catch (error) {
+        console.log("error::", error);
+      }
     }
     setOpenDialog(false);
   };
@@ -254,14 +193,14 @@ const Dashboard = () => {
 
   const handleEmployeeChange = (event) => {
     const { value, checked } = event.target;
+    const employeeId = parseInt(value, 10); // Ensure the value is a number
+
     setSelectedEmployees((prev) =>
-      checked ? [...prev, value] : prev.filter((id) => id !== value)
+      checked ? [...prev, employeeId] : prev.filter((id) => id !== employeeId)
     );
   };
 
   const handleAssignSubmit = () => {
-    // Handle assignment logic here
-    console.log("Selected Employees:", selectedEmployees);
     setOpenAssignDialog(false);
   };
 
@@ -270,34 +209,40 @@ const Dashboard = () => {
     navigate("/");
   };
 
-  const fetchDepartments = async() => {
+  const fetchDepartments = async () => {
     setLoading(true);
-    const response = await api.get(`${endPoints.allDepartments}?page=${page}&limit=${rowsPerPage}`);
-    console.log(response?.data?.data);
+    const response = await api.get(
+      `${endPoints.allDepartments}?page=${page}&limit=${rowsPerPage}`
+    );
+
     setDepartments(response?.data?.data?.data);
     setTotalRows(response?.data?.data?.totalItems);
-    // Simulate API call
-    // setTimeout(() => {
-    //   setDepartments(
-    //     dummyDepartments.slice(
-    //       page * rowsPerPage,
-    //       page * rowsPerPage + rowsPerPage
-    //     )
-    //   );
-    //   setLoading(false);
-    // }, 1000); // Simulate a network delay
+    setLoading(false);
   };
 
-
   useEffect(() => {
-    
     fetchDepartments();
   }, [page]);
 
   const handleChangePage = (event, newPage) => {
-    console.log('event',event);
-    console.log(newPage);
     setPage(newPage);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const data = await api.delete(
+        `${endPoints.deleteDept}?departmentId=${id}`
+      );
+
+      if (data?.data?.statusCode == 200) {
+        alert("department deleted");
+        setTimeout(() => {
+          fetchDepartments();
+        }, 500);
+      }
+    } catch (error) {
+      console.log("data");
+    }
   };
 
   return (
@@ -366,7 +311,11 @@ const Dashboard = () => {
                             >
                               Edit
                             </Button>
-                            <Button variant="outlined" color="error">
+                            <Button
+                              variant="outlined"
+                              color="error"
+                              onClick={() => handleDelete(department.id)}
+                            >
                               Delete
                             </Button>
                           </TableCell>
@@ -409,16 +358,21 @@ const Dashboard = () => {
                 fullWidth
                 variant="standard"
               />
-              <TextField
-                margin="dense"
-                label="Category"
-                type="text"
-                name="categoryName"
-                value={formData.categoryName}
-                onChange={handleChange}
-                fullWidth
-                variant="standard"
-              />
+               <FormControl fullWidth margin="dense" variant="standard">
+        <InputLabel>Category</InputLabel>
+        <Select
+          name="categoryName"
+          value={formData.categoryName}
+          onChange={handleChange}
+          label="Category"
+        >
+          <MenuItem value="HR">HR</MenuItem>
+          <MenuItem value="IT">IT</MenuItem>
+          <MenuItem value="Sales">Sales</MenuItem>
+          <MenuItem value="Product">Product</MenuItem>
+          <MenuItem value="Marketing">Marketing</MenuItem>
+        </Select>
+      </FormControl>
               <TextField
                 margin="dense"
                 label="Location"
@@ -463,10 +417,11 @@ const Dashboard = () => {
             fullWidth
           >
             <DialogTitle>Assign Employees</DialogTitle>
+
             <DialogContent sx={{ height: "400px", overflowY: "auto" }}>
-              {dummyEmployees.map((employee) => (
+              {employees.map((emp) => (
                 <Box
-                  key={employee.id}
+                  key={emp.id}
                   sx={{
                     display: "flex",
                     justifyContent: "space-between",
@@ -474,12 +429,14 @@ const Dashboard = () => {
                     mb: 1,
                   }}
                 >
-                  <Typography>{employee.name}</Typography>
+                  <Typography>
+                    {emp?.firstName} {emp?.lastName}
+                  </Typography>
                   <FormControlLabel
                     control={
                       <Checkbox
-                        checked={selectedEmployees.includes(employee.id)}
-                        value={employee.id}
+                        checked={selectedEmployees.includes(emp.id)}
+                        value={emp.id} // Ensure this is a number
                         onChange={handleEmployeeChange}
                       />
                     }
@@ -488,6 +445,7 @@ const Dashboard = () => {
                 </Box>
               ))}
             </DialogContent>
+
             <DialogActions
               sx={{
                 position: "sticky",
@@ -510,40 +468,45 @@ const Dashboard = () => {
             />
           ) : (
             <Paper sx={{ width: "100%", overflow: "hidden" }}>
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Employee Name</TableCell>
-                      <TableCell>Email</TableCell>
-                      <TableCell>Role</TableCell>
-                      <TableCell>Assigned Department</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {employees.length > 0 ? (
-                      employees.map((employee) => (
-                        <TableRow key={employee.id}>
-                          <TableCell>{employee.name}</TableCell>
-                          <TableCell>{employee.email}</TableCell>
-                          <TableCell>{employee.role}</TableCell>
-                          <TableCell>
-                            {employee.department
-                              ? employee.department.name
-                              : "None"}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={4} align="center">
-                          <Typography>No employees available</Typography>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+              <Card sx={{ minWidth: 275 }}>
+                <CardContent>
+                  <Typography
+                    sx={{ fontSize: 24 }}
+                    color="text.secondary"
+                    gutterBottom
+                  >
+                    {empdetail?.firstName} {empdetail?.lastName}
+                  </Typography>
+                  <Typography variant="h5" component="div">
+                    {empdetail?.email}
+                    {/* be{bull}nev{bull}o{bull}lent */}
+                  </Typography>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Department Name</th>
+                        <th>Catergory</th>
+                        <th>Location</th>
+                        <th>Salary</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {empdetail?.Departments?.map((e) => {
+                        return (
+                          <>
+                            <tr>
+                              <td>{e.departmentName}</td>
+                              <td>{e.categoryName}</td>
+                              <td>{e.location}</td>
+                              <td>{e.salary}</td>
+                            </tr>
+                          </>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </CardContent>
+              </Card>
             </Paper>
           )}
         </Box>

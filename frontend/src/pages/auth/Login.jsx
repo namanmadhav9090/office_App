@@ -65,6 +65,7 @@ const LoginPage = () => {
       if (response.data?.statusCode == 200 || 201) {
         Cookies.set("access_token",response.data?.data?.token);
         Cookies.set("role",response?.data?.data?.user?.role);
+        Cookies.set("id",response?.data?.data?.user?.id);
         navigate("/dashboard");
       }
     } catch (error) {

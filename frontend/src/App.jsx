@@ -6,11 +6,13 @@ import SignUp from './pages/auth/Signup';
 import NotFoundPage from './pages/NotFound';
 import Login from './pages/auth/Login';
 import Dashboard from './pages/Dashboard';
-import DepartmentTable from './pages/Departments';
-import Cookies from 'js-cookie';
 import ProtectedRoute from './components/ProtectedRoute';
+import { useSelector } from 'react-redux';
 
 function App() {
+
+  const utils = useSelector((state)=> state.utils);
+ 
 
 
   return (

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { useDispatch } from 'react-redux';
 // Import your Redux actions (replace with actual imports)
 // import { setLoading, setError, clearError } from '../redux/actions';
 
@@ -8,6 +9,8 @@ const api = axios.create({
   baseURL: 'http://localhost:8000/api', // Replace with your API base URL
   timeout: 10000, // Set timeout if needed
 });
+
+// const dispatch = useDispatch()
 
 // Axios request interceptor
 api.interceptors.request.use(
@@ -18,6 +21,7 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
     // Optionally set a loading indicator here if needed
     // dispatch(setLoading(true));
     return config;

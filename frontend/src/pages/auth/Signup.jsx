@@ -74,6 +74,12 @@ const SignUp = () => {
         return handleClick("Please fill all details", "error");
       }
 
+      // Password validation logic
+  const passwordError = validatePassword(formData.password);
+  if (passwordError) {
+    return handleClick(passwordError, "error");
+  }
+
    
       const response = await api.post(endPoints.signup, formData);
      
@@ -81,12 +87,49 @@ const SignUp = () => {
       if (response.data?.statusCode == 200 || 201) {
         Cookies.set("access_token",response.data?.data?.token);
         Cookies.set("role",response?.data?.data?.newUser?.role);
+        Cookies.set("id",response?.data?.data?.newUser?.id);
         navigate("/dashboard");
       }
     } catch (error) {
       console.log("error", error);
       return handleClick(error?.response?.data?.message, "error");
     }
+  };
+
+  const validatePassword = (password) => {
+    const minLength = 8;
+    const maxLength = 20;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  
+    if (password.length < minLength || password.length > maxLength) {
+      return 'Password must be between 8 and 20 characters.';
+    }
+    if (!hasUpperCase) {
+      return 'Password must contain at least one uppercase letter.';
+    }
+    if (!hasLowerCase) {
+      return 'Password must contain at least one lowercase letter.';
+    }
+    if (!hasNumber) {
+      return 'Password must contain at least one number.';
+    }
+    if (!hasSpecialChar) {
+      return 'Password must contain at least one special character.';
+    }
+  
+    return ''; // Valid password
+  };
+  const [passwordError, setPasswordError] = useState('');
+
+  const handlePasswordChange = (e) => {
+    const { value } = e.target;
+    const error = validatePassword(value);
+
+    setPasswordError(error);
+    handleChange(e); // Call the original handleChange function
   };
 
   return (
@@ -142,15 +185,17 @@ const SignUp = () => {
         margin="normal"
         required
       />
-      <TextField
+     <TextField
         fullWidth
         label="Password"
         name="password"
         type="password"
         value={formData.password}
-        onChange={handleChange}
+        onChange={handlePasswordChange}
         margin="normal"
         required
+        error={!!passwordError}
+        helperText={passwordError}
       />
       <FormControl fullWidth margin="normal" required>
         <InputLabel>Role</InputLabel>
